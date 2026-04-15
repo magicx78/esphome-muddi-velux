@@ -1,0 +1,174 @@
+globals:
+  - id: api_was_connected
+    type: bool
+    restore_value: yes
+    initial_value: "false"
+  - id: boot_time_var
+    type: int64_t
+    restore_value: yes
+    initial_value: "0"
+
+esphome:
+  on_boot:
+    - priority: 800.0
+      then:
+        - lambda: |-
+            id(api_was_connected) = true;
+            id(boot_time_var) = id(sntp_time).now().timestamp;
+        - wait_until:
+            condition: api.connected
+            timeout: 15s
+        - if:
+            condition:
+              lambda: 'return id(sntp_time).now().is_valid();'
+            then:
+              - logger.log: "Zeit von SNTP geladen."
+            else:
+              - lambda: |-
+                  ESP_LOGW("time", "SNTP-Zeit nicht verfügbar. Verwende gespeicherte Zeit.");
+        - homeassistant.service:
+            service: script.${esphome_name}_init
+            data: {}
+        - lambda: |-
+            ESP_LOGD("boot", "ESPHome boot finished");
+        - text_sensor.template.publish:
+            id: api_status_text
+            state: "OK"
+        - text_sensor.template.publish:
+            id: time_status_text
+            state: "OK"
+time:
+  - platform: sntp
+    id: sntp_time
+    timezone: Europe/Berlin
+    on_time_sync:
+        - logger.log: "Time synchronized with NTP"
+
+ #   on_time:
+ #     - seconds: /10
+ #       then:
+ #         script.execute: mode_update
+
+
+text_sensor:
+  - platform: template
+    name: "Fehler Verbindung (API)"
+    id: api_status_text
+    entity_category: diagnostic
+    update_interval: never
+
+  - platform: template
+    name: "Fehler Zeit (SNTP)"
+    id: time_status_text
+    entity_category: diagnostic
+    update_interval: never
+
+  - platform: template
+    name: "Datum"
+    entity_category: diagnostic
+    id: local_date
+    update_interval: 60s
+    lambda: |-
+      auto t = id(sntp_time).now();
+      if (!t.is_valid()) return {};
+      char buf[16];
+      t.strftime(buf, sizeof(buf), "%d.%m.%Y");
+      return {buf};
+
+  - platform: template
+    name: "Uhrzeit"
+    entity_category: diagnostic
+    id: local_time
+    update_interval: 1s
+    lambda: |-
+      auto t = id(sntp_time).now();
+      if (!t.is_valid()) return {};
+      char buf[9];
+      t.strftime(buf, sizeof(buf), "%H:%M:%S");
+      return {buf};
+
+  - platform: wifi_info
+    ip_address:
+      name: "IP Adresse"
+      entity_category: diagnostic
+    ssid:
+      name: "WLAN SSID"
+      entity_category: diagnostic
+    bssid:
+      name: "WLAN BSSID"
+      entity_category: diagnostic
+    mac_address:
+      name: "MAC Adresse"
+      entity_category: diagnostic
+
+  - platform: template
+    name: "Uptime"
+    icon: mdi:clock-outline
+    entity_category: diagnostic
+    lambda: |-
+      uint32_t dur = (uint32_t) id(uptime_s).state;
+      uint32_t d = dur / 86400;
+      uint8_t h = (dur % 86400) / 3600;
+      uint8_t m = (dur % 3600) / 60;
+      uint8_t s = dur % 60;
+      char buf[32];
+      snprintf(buf, sizeof(buf), "%ud %02u:%02u:%02u", d, h, m, s);
+      return std::string(buf);
+      
+sensor:
+  - platform: uptime
+    id: uptime_s
+    update_interval: 60s
+
+binary_sensor:
+  - platform: status
+    id: device_status
+
+  - platform: template
+    name: "Fehler Verbindung (API offline)"
+    device_class: problem
+    lambda: |-
+      return !id(device_status).state;
+    filters:
+      - delayed_on: 30s
+      - delayed_off: 5s
+
+  - platform: template
+    name: "Fehler Zeit (SNTP ungültig)"
+    device_class: problem
+    lambda: |-
+      return !id(sntp_time).now().is_valid();
+    filters:
+      - delayed_on: 120s
+      - delayed_off: 5s
+
+interval:
+  - interval: 60s
+    then:
+      - if:
+          condition:
+            api.connected:
+          then:
+            - text_sensor.template.publish:
+                id: api_status_text
+                state: "OK"
+          else:
+            - text_sensor.template.publish:
+                id: api_status_text
+                state: "Fehler Verbindung (API offline)"
+      - lambda: |-
+          auto t = id(sntp_time).now();
+          if (t.is_valid()) {
+            id(time_status_text).publish_state("OK");
+          } else {
+            id(time_status_text).publish_state("Fehler Zeit (SNTP ungültig)");
+          }
+
+  - interval: 24h
+    then:
+      - text_sensor.template.publish:
+          id: api_status_text
+          state: "OK"
+      - text_sensor.template.publish:
+          id: time_status_text
+          state: "OK"
