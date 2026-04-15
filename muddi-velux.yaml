@@ -1,45 +1,29 @@
+# ===================== PARAMETER =====================
 substitutions:
+
+  esphome_name: "Velux Fenster"
+
   latitude: 52.0302
   longitude: 8.5325
-
+  # Fenster-Namen
   window_1_name: "Gäste Schlafzimmer Velux"
   window_2_name: "Küchen Velux Fenster"
-  window_3_name: "Flur Elektro K. Velux Denster"
-  window_4_name: "Wohnzimmer Velux Fenster"
+  window_3_name: "Empore"
+  window_4_name: "Wohnzimmer Velux Fenster" #########hoch runter !
   window_5_name: "Schlafzimmer Links"
   window_6_name: "Schlafzimmer rechts"
-  window_7_name: "Dachfenster Nord 1"
-  window_8_name: "Dachfenster Nord 2"
   window_alle_name: "Alle 1-8"
-
-  open_duration_1: "95s"
-  close_duration_1: "95s"
-  pulse_length_1: "95s"
-
-  open_duration_2: "28s"
-  close_duration_2: "25s"
-  pulse_length_2: "28s"
-
-  open_duration_3: "95s"
-  close_duration_3: "95s"
-  pulse_length_3: "95s"
-
-  open_duration_4: "120s"
-  close_duration_4: "120s"
-  pulse_length_4: "120s"
-
-  open_duration_5: "95s"
-  close_duration_5: "95s"
-  pulse_length_5: "95s"
-
-  open_duration_6: "95s"
-  close_duration_6: "95s"
-  pulse_length_6: "95s"
+  name: "OG"
+#########################
+#Schalter
+########################
+#  OG_Schalter_1: "Whonzimmer l"
 
 
 
-  pin_open_1:  "GPIO14"
-  pin_close_1: "GPIO18"
+  # GPIOs (PLATZHALTER – bitte ersetzen)
+  pin_open_1:  "GPIO21"  #14
+  pin_close_1: "GPIO19"  #18
 
   pin_open_2:  "GPIO17"
   pin_close_2: "GPIO20"
@@ -53,252 +37,660 @@ substitutions:
   pin_open_5:  "GPIO10"
   pin_close_5: "GPIO11"
 
-  pin_open_6:  "GPIO12"
-  pin_close_6: "GPIO13"
+  pin_open_6:  "GPIO13"
+  pin_close_6: "GPIO12"
+###########################
+#  pin_open_7:  "GPIO21"
+#  pin_close_7: "GPIO19"
 
+#  pin_open_8:  "GPIO48"
+#  pin_close_8: "GPIO47"
+
+  # Ziel für Push-Nachrichten
   notify_target: "notify.mobile_app_iphonecw"
+####################################
+##RSSI#############
+  $room: Einfahrt         ####erfordelich für ble
+ ###################
 
+  $yourname_1: CwIphone
+  $irk_1: "c7d5171eb38aa0192076d25599469d79"
+  $rssi_n1: "-70"
+  $delay_1: "60s"
+
+  $yourname_2: CwIwatch
+  $irk_2: "96cea52ec269cb28a56faa1172344581"
+  $rssi_n2: "-70"
+  $delay_2: "60s"
+
+  $yourname_3: MwIphone
+  $irk_3: "455302c0860ae9e5319bc918d50989b3"
+  $rssi_n3: "-70"
+  $delay_3: "60s"
+
+  $yourname_4: MwIwatch
+  $irk_4: "a9fcdc3a45dde796b53a6dcb05920051"
+  $rssi_n4: "-70"
+  $delay_4: "60s"
+
+  $yourname_5: Yeti
+  $uuid_5: "c79ce823-e67a-4e71-bff2-abaa32e79a96"
+  $rssi_n5: "-75"
+  $delay_5: "60s"
+
+  $yourname_6: octavia
+  $uuid_6: "c29ce823-e67a-4e71-bff2-abaa32e77a98"
+  $rssi_n6: "-75"
+  $delay_6: "60s"
+
+################################
+## CONFIG ######################
+
+################################
+## CONFIG ######################
 esphome:
   name: muddi-velux
+# Beim Start: letzte bekannte Position je Cover aus dem wiederhergestellten Zustand anfahren
   on_boot:
-    - priority: 800
-      then:
-        - output.turn_off: pwm_mod1
-        - output.turn_off: pwm_mod2
-        - output.turn_off: pwm_mod3
-        - output.turn_off: pwm_mod4
-        - output.turn_off: pwm_mod5
-        - output.turn_off: pwm_mod6
-    - priority: 600
-      then:
-        - logger.log:
-            format: "Boot: Jalousie-Controller gestartet, Automatik = %s"
-            args: [ to_string(id(jalousie_automatik).state).c_str() ]
-    - priority: -100
-      then:
-        - text_sensor.template.publish: { id: api_status_text,  state: "OK" }
-        - text_sensor.template.publish: { id: time_status_text, state: "OK" }
- #   - priority: -10
- #     then:
- #       - script.execute: auto_enable_if_unlocked
+    priority: 600
+    then:
+      - delay: 400ms
+
+     # Cover 1
+      - if:
+          condition:
+            lambda: 'return !isnan(id(cover_1).position);'
+          then:
+            - cover.control:
+                id: cover_1
+                position: !lambda 'return id(cover_1).position;'
+      - delay: 1s
+
+    # Cover 2
+      - if:
+          condition:
+            lambda: 'return !isnan(id(cover_2).position);'
+          then:
+            - cover.control:
+                id: cover_2
+                position: !lambda 'return id(cover_2).position;'
+      - delay: 1s
+
+    # Cover 3
+      - if:
+          condition:
+            lambda: 'return !isnan(id(cover_3).position);'
+          then:
+            - cover.control:
+                id: cover_3
+                position: !lambda 'return id(cover_3).position;'
+      - delay: 1s
+
+    # Cover 4
+      - if:
+          condition:
+            lambda: 'return !isnan(id(cover_4).position);'
+          then:
+            - cover.control:
+                id: cover_4
+                position: !lambda 'return id(cover_4).position;'
+      - delay: 1s
+
+    # Cover 5
+      - if:
+          condition: 
+            lambda: 'return !isnan(id(cover_5).position);'
+          then:
+            - cover.control:
+                id: cover_5
+                position: !lambda 'return id(cover_5).position;'
+      - delay: 1s
+
+    # Cover 6
+      - if:
+          condition:
+            lambda: 'return !isnan(id(cover_6).position);'
+          then:
+            - cover.control:
+                id: cover_6
+                position: !lambda 'return id(cover_6).position;'
+
+
+#    - custom_componets\smart_timer_cover\smart_time_cover.h
+
+
+
+
+packages:
+  monitoring: !include components/monitoring.yaml
+
+#  irk_sensor: !include components/irk_sensor.yaml
 
 esp32:
-  board: esp32-s3-devkitc-1
+  board: esp32dev
   framework:
     type: esp-idf
-
-ota:
-  - platform: esphome
-    password: "4e91f61a16c653543643442a86e58dff"
+    sdkconfig_options:
+      CONFIG_COMPILER_OPTIMIZATION_SIZE: y
 
 wifi:
   ssid: !secret wifi_ssid
   password: !secret wifi_password
 
-i2c:
-  - id: bus_a
-    sda: 3
-    scl: 2
-    scan: true
-    frequency: 400kHz
-
-pcf8574:
-  - id: 'pcf8574_hub_in_1'
-    i2c_id: bus_a
-    address: 0x24
-    pcf8575: true
-
-interval:
-  - interval: 10s
-    then:
-      - if:
-          condition: api.connected
-          then:
-            - text_sensor.template.publish: { id: api_status_text, state: "OK" }
-          else:
-            - text_sensor.template.publish: { id: api_status_text, state: "Fehler Verbindung (API offline)" }
-      - lambda: |-
-          auto t = id(sntp_time).now();
-          id(time_status_text).publish_state(t.is_valid() ? "OK" : "Fehler Zeit (SNTP ungültig)");
-  - interval: 24h
-    then:
-      - text_sensor.template.publish: { id: api_status_text, state: "OK" }
-      - text_sensor.template.publish: { id: time_status_text, state: "OK" }
-
 logger:
-  level: DEBUG
-
-time:
-  - platform: sntp
-    id: sntp_time
-    timezone: Europe/Berlin
-    on_time_sync:
-      - logger.log: "Time synchronized with NTP"
+  level: debug
 
 preferences:
   flash_write_interval: 15min
 
-packages:
-  monitoring: !include components/monitoring.yaml
+
 
 api:
   encryption:
     key: "50W+iCzJ2PitfU/6aY1L+7c35rVKHL/WG62NFSTg2lo="
   reboot_timeout: 0s
-  on_client_connected:
-    then:
-      - if:
-          condition:
-            lambda: |-
-              const bool safe_end = (id(last_state_1) == 1 || id(last_state_1) == 2);
-              return !(safe_end && !id(in_motion_1)) && !id(notify_sent_1);
-          then:
-            - homeassistant.service:
-                service: ${notify_target}
-                data: { title: "Jalousie-Steuerung", message: "Fenster 1: Kalibrierung erforderlich – letzter Zustand unsicher." }
-            - homeassistant.service:
-                service: persistent_notification.create
-                data: { title: "Jalousie-Steuerung", message: "Fenster 1: Kalibrierung nötig (Neustart während Fahrt oder Endlage unbekannt)." }
-            - lambda: |-
-                id(needs_calibration_1) = true;
-                id(notify_sent_1) = true;
-          else:
-            - lambda: |-
-                id(needs_calibration_1) = false;
-                id(notify_sent_1) = false;
 
-      - if:
-          condition:
-            lambda: |-
-              const bool safe_end = (id(last_state_3) == 1 || id(last_state_3) == 2);
-              return !(safe_end && !id(in_motion_3)) && !id(notify_sent_3);
-          then:
-            - homeassistant.service:
-                service: ${notify_target}
-                data: { title: "Jalousie-Steuerung", message: "Fenster 3: Kalibrierung erforderlich – letzter Zustand unsicher." }
-            - homeassistant.service:
-                service: persistent_notification.create
-                data: { title: "Jalousie-Steuerung", message: "Fenster 3: Kalibrierung nötig (Neustart während Fahrt oder Endlage unbekannt)." }
-            - lambda: |-
-                id(needs_calibration_3) = true;
-                id(notify_sent_3) = true;
-          else:
-            - lambda: |-
-                id(needs_calibration_3) = false;
-                id(notify_sent_3) = false;
+ota:
+  - platform: esphome
+    password: "4e91f61a16c653543643442a86e58dff"
 
-      - if:
-          condition:
-            lambda: |-
-              const bool safe_end = (id(last_state_4) == 1 || id(last_state_4) == 2);
-              return !(safe_end && !id(in_motion_4)) && !id(notify_sent_4);
-          then:
-            - homeassistant.service:
-                service: ${notify_target}
-                data: { title: "Jalousie-Steuerung", message: "Fenster 4: Kalibrierung erforderlich – letzter Zustand unsicher." }
-            - homeassistant.service:
-                service: persistent_notification.create
-                data: { title: "Jalousie-Steuerung", message: "Fenster 4: Kalibrierung nötig (Neustart während Fahrt oder Endlage unbekannt)." }
-            - lambda: |-
-                id(needs_calibration_4) = true;
-                id(notify_sent_4) = true;
-          else:
-            - lambda: |-
-                id(needs_calibration_4) = false;
-                id(notify_sent_4) = false;
 
-      - if:
-          condition:
-            lambda: |-
-              const bool safe_end = (id(last_state_5) == 1 || id(last_state_5) == 2);
-              return !(safe_end && !id(in_motion_5)) && !id(notify_sent_5);
-          then:
-            - homeassistant.service:
-                service: ${notify_target}
-                data: { title: "Jalousie-Steuerung", message: "Fenster 5: Kalibrierung erforderlich – letzter Zustand unsicher." }
-            - homeassistant.service:
-                service: persistent_notification.create
-                data: { title: "Jalousie-Steuerung", message: "Fenster 5: Kalibrierung nötig (Neustart während Fahrt oder Endlage unbekannt)." }
-            - lambda: |-
-                id(needs_calibration_5) = true;
-                id(notify_sent_5) = true;
-          else:
-            - lambda: |-
-                id(needs_calibration_5) = false;
-                id(notify_sent_5) = false;
 
-      - if:
-          condition:
-            lambda: |-
-              const bool safe_end = (id(last_state_6) == 1 || id(last_state_6) == 2);
-              return !(safe_end && !id(in_motion_6)) && !id(notify_sent_6);
-          then:
-            - homeassistant.service:
-                service: ${notify_target}
-                data: { title: "Jalousie-Steuerung", message: "Fenster 6: Kalibrierung erforderlich – letzter Zustand unsicher." }
-            - homeassistant.service:
-                service: persistent_notification.create
-                data: { title: "Jalousie-Steuerung", message: "Fenster 6: Kalibrierung nötig (Neustart während Fahrt oder Endlage unbekannt)." }
-            - lambda: |-
-                id(needs_calibration_6) = true;
-                id(notify_sent_6) = true;
-          else:
-            - lambda: |-
-                id(needs_calibration_6) = false;
-                id(notify_sent_6) = false;
+#ethernet:
+#  type: LAN8720
+#  mdc_pin: GPIO23
+#  mdio_pin: GPIO18
+#  clk_mode: GPIO17_OUT
+#  phy_addr: 0
+
+uart:
+  - id: rs485
+    tx_pin: GPIO13
+    rx_pin: GPIO16
+    baud_rate: 9600
+
+remote_receiver:
+  pin:
+    number: GPIO2
+    ignore_strapping_warning: true
+
+remote_transmitter:
+  pin:
+    number: GPIO15
+    ignore_strapping_warning: true
+  carrier_duty_percent: 100%
+
+i2c:
+  sda: GPIO4
+  scl:
+    number: GPIO5
+    ignore_strapping_warning: true
+  scan: true
+  frequency: 400kHz
+
+
+pcf8574:
+  - id: inputs_1_8
+    address: 0x22
+    pcf8575: false
+  - id: inputs_9_16
+    address: 0x21
+    pcf8575: false
+  - id: outputs_1_8
+    address: 0x24
+    pcf8575: false
+  - id: outputs_9_16
+    address: 0x25
+    pcf8575: false
+
+################################################################
+# ende der config - sntp_time kommt aus components/monitoring.yaml
+#################################################################
+globals:
+  - id: next_up_epoch
+    type: uint32_t
+    initial_value: "0"
+  - id: next_down_epoch
+    type: uint32_t
+    initial_value: "0"
 
 output:
-  - platform: ledc
-    pin: GPIO15
-    id: pwm_mod1
-    frequency: 1000Hz
-  - platform: ledc
-    pin: GPIO9
-    id: pwm_mod2
-    frequency: 1000Hz
-  - platform: ledc
-    pin: GPIO4
-    id: pwm_mod3
-    frequency: 1000Hz
-  - platform: ledc
-    pin: GPIO16
-    id: pwm_mod4
-    frequency: 1000Hz
-  - platform: ledc
-    pin: GPIO47
-    id: pwm_mod5
-    frequency: 100Hz
-  - platform: ledc
-    pin: GPIO48
-    id: pwm_mod6
-    frequency: 100Hz
+  - platform: gpio
+  #  name: pwm_1
+    id: pwm_1
+    pin:
+      number: GPIO32
+      inverted: true
+#  - platform: ledc
+#    pin: GPIO32   #15
+#    id: pwm_mod1
+#    frequency: 1k
+  
+
+  - platform: gpio
+  #  name: pwm_2
+    id: pwm_2
+    pin:
+      number: GPIO33
+      inverted: true
+#  - platform: ledc
+#    pin: GPIO38   #9
+#    id: pwm_mod2
+#    frequency: 1k
+  
+
+
+  - platform: gpio
+    id: pwm_3
+  #  name: pwm_3
+    pin:
+      number: GPIO14
+      inverted: true
+
+binary_sensor:
+
+  - platform: gpio
+    name: "${name}_Schalter_1"
+    pin:
+      pcf8574: inputs_1_8
+      number: 0
+      mode: INPUT
+      inverted: true
+
+  - platform: gpio
+    name: "${name}_Schalter_2"
+    pin:
+      pcf8574: inputs_1_8
+      number: 1
+      mode: INPUT
+      inverted: true
+
+  - platform: gpio
+    name: "${name}_Schalter_3"
+    pin:
+      pcf8574: inputs_1_8
+      number: 2
+      mode: INPUT
+      inverted: true
+
+  - platform: gpio
+    name: "${name}_Schalter_4"
+    pin:
+      pcf8574: inputs_1_8
+      number: 3
+      mode: INPUT
+      inverted: true
+
+  - platform: gpio
+    name: "${name}_Schalter_5"
+    pin:
+      pcf8574: inputs_1_8
+      number: 4
+      mode: INPUT
+      inverted: true
+
+  - platform: gpio
+    name: "${name}_Schalter_6"
+    pin:
+      pcf8574: inputs_1_8
+      number: 5
+      mode: INPUT
+      inverted: true
+
+  - platform: gpio
+    name: "${name}_Schalter_7"
+    pin:
+      pcf8574: inputs_1_8
+      number: 6
+      mode: INPUT
+      inverted: true
+
+  - platform: gpio
+    name: "${name}_Schalter_8"
+    pin:
+      pcf8574: inputs_1_8
+      number: 7
+      mode: INPUT
+      inverted: true
+
+  - platform: gpio
+    name: "${name}_Schalter_9"
+    pin:
+      pcf8574: inputs_9_16
+      number: 0
+      mode: INPUT
+      inverted: true
+
+  - platform: gpio
+    name: "${name}_Schalter_10"
+    pin:
+      pcf8574: inputs_9_16
+      number: 1
+      mode: INPUT
+      inverted: true
+
+  - platform: gpio
+    name: "${name}_Schalter_11"
+    pin:
+      pcf8574: inputs_9_16
+      number: 2
+      mode: INPUT
+      inverted: true
+
+  - platform: gpio
+    name: "${name}_Schalter_12"
+    pin:
+      pcf8574: inputs_9_16
+      number: 3
+      mode: INPUT
+      inverted: true
+
+  - platform: gpio
+    name: "${name}_Schalter_13"
+    pin:
+      pcf8574: inputs_9_16
+      number: 4
+      mode: INPUT
+      inverted: true
+
+  - platform: gpio
+    name: "${name}_Schalter_14"
+    pin:
+      pcf8574: inputs_9_16
+      number: 5
+      mode: INPUT
+      inverted: true
+
+  - platform: gpio
+    name: "${name}_Schalter_15"
+    pin:
+      pcf8574: inputs_9_16
+      number: 6
+      mode: INPUT
+      inverted: true
+
+  - platform: gpio
+    name: "${name}_Schalter_16"
+    pin:
+      pcf8574: inputs_9_16
+      number: 7
+      mode: INPUT
+      inverted: true
+
+switch:
+
+  - platform: template
+    name: "Jalousie Automatik"
+    id: jalousie_automatik
+    optimistic: true
+
+    turn_on_action:
+      - logger.log:
+          format: "Automatik aktiviert (Modus = %s)"
+          args: [ id(twilight_mode).state.c_str() ]
+
+      - lambda: |-
+          using esphome::cover::Cover;
+
+          auto now = id(sntp_time).now();
+          if (!now.is_valid()) { ESP_LOGW("jalousie","Zeitquelle ungültig – blockiere."); return; }
+          const int hour = now.hour;                // 0..23
+          const bool allow_open  = hour >= 6;       // Öffnen nur ab 06:00
+          const bool allow_close = (hour >= 17) || (hour < 6);  // Schließen 17:00–24:00 und 00:00–06:00
+
+          auto open_safe = [&](Cover *cv) {
+            if (allow_open) cv->make_call().set_command_open().perform();
+            else ESP_LOGI("jalousie", "Öffnen vor 06:00 blockiert.");
+          };
+          auto close_safe = [&](Cover *cv) {
+            if (allow_close) cv->make_call().set_command_close().perform();
+            else ESP_LOGI("jalousie", "Schließen zwischen 06:00–17:00 blockiert.");
+          };
+          auto position_safe = [&](Cover *cv, float p) {
+            // >0.5 = öffnen, <=0.5 = schließen  (0.50 nun „schließen“!)
+            if (p > 0.5f) {
+              if (allow_open) cv->make_call().set_position(p).perform();
+              else ESP_LOGI("jalousie", "Position %.0f%% vor 06:00 blockiert.", p*100);
+            } else {
+              if (allow_close) cv->make_call().set_position(p).perform();
+              else ESP_LOGI("jalousie", "Position %.0f%% zwischen 06:00–17:00 blockiert.", p*100);
+            }
+          };
+
+          double elev = id(sun_sun).elevation();
+          auto mode = id(twilight_mode).state;
+
+          auto apply = [&](Cover *cv) {
+            if (mode == "astronomisch") {
+              if (elev > -18.0) position_safe(cv, 0.10f); else close_safe(cv);
+            } else if (mode == "nautisch") {
+              if (elev > -12.0) position_safe(cv, 0.50f); else position_safe(cv, 0.10f);
+            } else if (mode == "bürgerlich") {
+              if (elev > -6.0) open_safe(cv); else position_safe(cv, 0.50f);
+            }
+          };
+
+          apply(id(cover_1)); apply(id(cover_2)); apply(id(cover_3)); apply(id(cover_4));
+          apply(id(cover_5)); apply(id(cover_6));
+
+
+#########################GPIO COVER_1-6
+  - platform: gpio
+    name: ${window_1_name}_auf   
+    id: relais_auf_1
+    interlock: [relais_zu_1]
+    interlock_wait_time: 500ms   # kleine Pause beim Richtungswechsel (optional)
+    restore_mode: ALWAYS_OFF     # sicher starten
+    pin:
+      pcf8574: outputs_1_8
+      number: 0
+      mode: OUTPUT
+      inverted: true
+
+  - platform: gpio
+    name: ${window_1_name}_zu
+    id: relais_zu_1
+    interlock: [relais_auf_1]
+    interlock_wait_time: 500ms
+    restore_mode: ALWAYS_OFF    
+    pin:
+      pcf8574: outputs_1_8
+      number: 1
+      mode: OUTPUT
+      inverted: true
+
+  - platform: gpio
+    name: ${window_2_name}_auf
+    id: relais_auf_2
+    interlock: [relais_zu_2]
+    interlock_wait_time: 500ms   # kleine Pause beim Richtungswechsel (optional)
+    restore_mode: ALWAYS_OFF     # sicher starten
+    pin:
+      pcf8574: outputs_1_8
+      number: 2
+      mode: OUTPUT
+      inverted: true
+
+  - platform: gpio
+    name: ${window_2_name}_zu
+    id: relais_zu_2
+    interlock: [relais_auf_2]
+    interlock_wait_time: 500ms   # kleine Pause beim Richtungswechsel (optional)
+    restore_mode: ALWAYS_OFF     # sicher starten
+    pin:
+      pcf8574: outputs_1_8
+      number: 3
+      mode: OUTPUT
+      inverted: true
+
+  - platform: gpio
+    name: ${window_3_name}_auf 
+    id: relais_auf_3
+    interlock: [relais_zu_3]
+    interlock_wait_time: 500ms   # kleine Pause beim Richtungswechsel (optional)
+    restore_mode: ALWAYS_OFF     # sicher starten
+    pin:
+      pcf8574: outputs_1_8
+      number: 4
+      mode: OUTPUT
+      inverted: true
+
+  - platform: gpio
+    name: ${window_3_name}_zu 
+    id: relais_zu_3
+    interlock: [relais_auf_3]
+    interlock_wait_time: 500ms   # kleine Pause beim Richtungswechsel (optional)
+    restore_mode: ALWAYS_OFF     # sicher starten    
+    pin:
+      pcf8574: outputs_1_8
+      number: 5
+      mode: OUTPUT
+      inverted: true
+
+  - platform: gpio
+    name: ${window_4_name}_auf
+    id: relais_auf_4
+    interlock: [relais_zu_4]
+    interlock_wait_time: 500ms   # kleine Pause beim Richtungswechsel (optional)
+    restore_mode: ALWAYS_OFF     # sicher starten    
+    pin:
+      pcf8574: outputs_1_8
+      number: 6
+      mode: OUTPUT
+      inverted: true
+
+  - platform: gpio
+    name: ${window_4_name}_zu 
+    id: relais_zu_4
+    interlock: [relais_auf_4]
+    interlock_wait_time: 500ms   # kleine Pause beim Richtungswechsel (optional)
+    restore_mode: ALWAYS_OFF     # sicher starten
+    pin:
+      pcf8574: outputs_1_8
+      number: 7
+      mode: OUTPUT
+      inverted: true
+
+  - platform: gpio
+    name: ${window_5_name}_auf 
+    id: relais_auf_5
+    interlock: [relais_zu_5]
+    interlock_wait_time: 500ms   # kleine Pause beim Richtungswechsel (optional)
+    restore_mode: ALWAYS_OFF     # sicher starten    
+    pin:
+      pcf8574: outputs_9_16
+      number: 0
+      mode: OUTPUT
+      inverted: true
+
+  - platform: gpio
+    name: ${window_5_name}_zu 
+    id: relais_zu_5
+    interlock: [relais_auf_5]
+    interlock_wait_time: 500ms   # kleine Pause beim Richtungswechsel (optional)
+    restore_mode: ALWAYS_OFF     # sicher starten    
+    pin:
+      pcf8574: outputs_9_16
+      number: 1
+      mode: OUTPUT
+      inverted: true
+
+  - platform: gpio
+    name: ${window_6_name}_auf
+    id: relais_auf_6    
+    interlock: [relais_zu_6]
+    interlock_wait_time: 500ms   # kleine Pause beim Richtungswechsel (optional)
+    restore_mode: ALWAYS_OFF     # sicher starten
+    pin:
+      pcf8574: outputs_9_16
+      number: 2
+      mode: OUTPUT
+      inverted: true
+
+  - platform: gpio
+    name: ${window_6_name}_zu
+    id: relais_zu_6
+    interlock: [relais_auf_6]
+    interlock_wait_time: 500ms   # kleine Pause beim Richtungswechsel (optional)
+    restore_mode: ALWAYS_OFF     # sicher starten    
+    pin:
+      pcf8574: outputs_9_16
+      number: 3
+      mode: OUTPUT
+      inverted: true
+
+  - platform: gpio
+    name: "KC868-A16-Y13"
+    id: out_y13
+    pin:
+      pcf8574: outputs_9_16
+      number: 4
+      mode: OUTPUT
+      inverted: true
+
+  - platform: gpio
+    name: "KC868-A16-Y14"
+    id: out_y14
+    pin:
+      pcf8574: outputs_9_16
+      number: 5
+      mode: OUTPUT
+      inverted: true
+
+  - platform: gpio
+    name: "KC868-A16-Y15"
+    id: out_y15
+    pin:
+      pcf8574: outputs_9_16
+      number: 6
+      mode: OUTPUT
+      inverted: true
+
+  - platform: gpio
+    name: "KC868-A16-Y16"
+    id: out_y16
+    pin:
+      pcf8574: outputs_9_16
+      number: 7
+      mode: OUTPUT
+      inverted: true
 
 select:
   - platform: template
     name: "Dämmerungsmodus"
     id: twilight_mode
-    options: [Civil, Nautical, Astronomical]
+    options:
+      - Civil
+      - Nautical
+      - Astronomical
     initial_option: Civil
     optimistic: true
     on_value:
       then:
         - text_sensor.template.publish:
-            id: light_on_time
+            id: window_open_time
             state: !lambda |-
               auto sunset = id(sun_sun).sunset(
                 id(twilight_mode).state == "Civil" ? -0.833 :
                 id(twilight_mode).state == "Nautical" ? -6.0 : -18.0
               );
-              int shift_sunset = id(twilight_mode).state == "Civil" ? 0 :
+              int shift_sunset = id(twilight_mode).state == "Civil" ? -0 :
                                  id(twilight_mode).state == "Nautical" ? -20 : -20;
-              if (!sunset.has_value()) return "NaN";
+              if (!sunset.has_value()) {
+                ESP_LOGW("sun_shift", "Sunset calculation failed (%s)", id(twilight_mode).state.c_str());
+                return "NaN";
+              }
               int sunset_min = sunset.value().hour * 60 + sunset.value().minute + shift_sunset;
-              sunset_min = (sunset_min + 1440) % 1440;
+              sunset_min = (sunset_min + 1440) % 1440; // Normalize time
+              int sunset_hour = sunset_min / 60;
+              int sunset_minute = sunset_min % 60;
+              ESP_LOGD("sun_shift", "Sunset (%s): %02d:%02d, Shifted: %02d:%02d",
+                       id(twilight_mode).state.c_str(), sunset.value().hour, sunset.value().minute, sunset_hour, sunset_minute);
               char buffer[8];
-              snprintf(buffer, sizeof(buffer), "%02d:%02d", sunset_min/60, sunset_min%60);
+              snprintf(buffer, sizeof(buffer), "%02d:%02d", sunset_hour, sunset_minute);
               return buffer;
         - text_sensor.template.publish:
-            id: light_off_time
+            id: window_close_time
             state: !lambda |-
               auto sunrise = id(sun_sun).sunrise(
                 id(twilight_mode).state == "Civil" ? -0.833 :
@@ -306,382 +698,521 @@ select:
               );
               int shift_sunrise = id(twilight_mode).state == "Civil" ? 0 :
                                   id(twilight_mode).state == "Nautical" ? 10 : 10;
-              if (!sunrise.has_value()) return "NaN";
+              if (!sunrise.has_value()) {
+                ESP_LOGW("sun_shift", "Sunrise calculation failed (%s)", id(twilight_mode).state.c_str());
+                return "NaN";
+              }
               int sunrise_min = sunrise.value().hour * 60 + sunrise.value().minute + shift_sunrise;
-              sunrise_min = (sunrise_min + 1440) % 1440;
+              sunrise_min = (sunrise_min + 1440) % 1440; // Normalize time
+              int sunrise_hour = sunrise_min / 60;
+              int sunrise_minute = sunrise_min % 60;
+              ESP_LOGD("sun_shift", "Sunrise (%s): %02d:%02d, Shifted: %02d:%02d",
+                       id(twilight_mode).state.c_str(), sunrise.value().hour, sunrise.value().minute, sunrise_hour, sunrise_minute);
               char buffer[8];
-              snprintf(buffer, sizeof(buffer), "%02d:%02d", sunrise_min/60, sunrise_min%60);
+              snprintf(buffer, sizeof(buffer), "%02d:%02d", sunrise_hour, sunrise_minute);
               return buffer;
 
 text_sensor:
   - platform: template
     name: "Fahrzeit RUNTER ist um"
-    id: light_on_time
+    id: window_close_time
     lambda: |-
       float elevation = id(twilight_mode).state == "Civil" ? -0.833 :
-                        id(twilight_mode).state == "Nautical" ? -6.0 : -18.0;
-      int shift_sunset = id(twilight_mode).state == "Civil" ? 0 :
-                         id(twilight_mode).state == "Nautical" ? -20 : -20;
+      id(twilight_mode).state == "Nautical" ? -6.0 : -18.0;
+      int shift_sunset = id(twilight_mode).state == "Civil" ? -0 :
+      id(twilight_mode).state == "Nautical" ? -20 : -20;
       auto sunset = id(sun_sun).sunset(elevation);
-      if (!sunset.has_value()) return std::vector<std::string>{"NaN"};
+      if (!sunset.has_value()) {
+        ESP_LOGW("sun_shift", "Sunset calculation failed (%s)", id(twilight_mode).state.c_str());
+        return {"NaN"};
+      }
       int sunset_min = sunset.value().hour * 60 + sunset.value().minute + shift_sunset;
-      sunset_min = (sunset_min + 1440) % 1440;
+      sunset_min = (sunset_min + 1440) % 1440; // Normalize time
+      int sunset_hour = sunset_min / 60;
+      int sunset_minute = sunset_min % 60;
+      ESP_LOGD("sun_shift", "Sunset (%s): %02d:%02d, Shifted: %02d:%02d",
+      id(twilight_mode).state.c_str(), sunset.value().hour, sunset.value().minute, sunset_hour, sunset_minute);
       char buffer[8];
-      snprintf(buffer, sizeof(buffer), "%02d:%02d", sunset_min/60, sunset_min%60);
-      return std::vector<std::string>{buffer};
+      snprintf(buffer, sizeof(buffer), "%02d:%02d", sunset_hour, sunset_minute);
+      return {buffer};
     update_interval: 60s
 
   - platform: template
     name: "Fahrzeit HOCH ist um"
-    id: light_off_time
+    id: window_open_time
     lambda: |-
       float elevation = id(twilight_mode).state == "Civil" ? -0.833 :
                         id(twilight_mode).state == "Nautical" ? -6.0 : -18.0;
       int shift_sunrise = id(twilight_mode).state == "Civil" ? 0 :
                           id(twilight_mode).state == "Nautical" ? 10 : 10;
       auto sunrise = id(sun_sun).sunrise(elevation);
-      if (!sunrise.has_value()) return std::vector<std::string>{"NaN"};
+      if (!sunrise.has_value()) {
+        ESP_LOGW("sun_shift", "Sunrise calculation failed (%s)", id(twilight_mode).state.c_str());
+        return {"NaN"};
+      }
       int sunrise_min = sunrise.value().hour * 60 + sunrise.value().minute + shift_sunrise;
-      sunrise_min = (sunrise_min + 1440) % 1440;
+      sunrise_min = (sunrise_min + 1440) % 1440; // Normalize time
+      int sunrise_hour = sunrise_min / 60;
+      int sunrise_minute = sunrise_min % 60;
+      ESP_LOGD("sun_shift", "Sunrise (%s): %02d:%02d, Shifted: %02d:%02d",
+      id(twilight_mode).state.c_str(), sunrise.value().hour, sunrise.value().minute, sunrise_hour, sunrise_minute);
       char buffer[8];
-      snprintf(buffer, sizeof(buffer), "%02d:%02d", sunrise_min/60, sunrise_min%60);
-      return std::vector<std::string>{buffer};
+      snprintf(buffer, sizeof(buffer), "%02d:%02d", sunrise_hour, sunrise_minute);
+      return {buffer};
     update_interval: 60s
 
+
 button:
+
+
+  - platform: restart
+    name: "ESP Neustart"
+    id: btn_restart
+    entity_category: diagnostic
+    icon: mdi:restart
+
+  # --- Fenster alle 1-8 ---
   - platform: template
-    name: "Alle (1–6) – Sperren aufheben"
-    icon: "mdi:lock-open-variant"
+    name: "${window_alle_name} 0%"
     on_press:
-      - lambda: |-
-          id(needs_calibration_1) = false; id(notify_sent_1) = false;
-          id(needs_calibration_2) = false; id(notify_sent_2) = false;
-          id(needs_calibration_3) = false; id(notify_sent_3) = false;
-          id(needs_calibration_4) = false; id(notify_sent_4) = false;
-          id(needs_calibration_5) = false; id(notify_sent_5) = false;
-          id(needs_calibration_6) = false; id(notify_sent_6) = false;
-      - cover.template.publish: { id: jalousie1_ui, current_operation: IDLE }
-      - cover.template.publish: { id: jalousie2_ui, current_operation: IDLE }
-      - cover.template.publish: { id: jalousie3_ui, current_operation: IDLE }
-      - cover.template.publish: { id: jalousie4_ui, current_operation: IDLE }
-      - cover.template.publish: { id: jalousie5_ui, current_operation: IDLE }
-      - cover.template.publish: { id: jalousie6_ui, current_operation: IDLE }
+      then:
+        - cover.control:
+            id: cover_1
+            position: 0%
+        - cover.control:
+            id: cover_2
+            position: 0%
+        - cover.control:
+            id: cover_3
+            position: 0%
+        - cover.control:
+            id: cover_4
+            position: 0%
+        - cover.control:
+            id: cover_5
+            position: 0%
+        - cover.control:
+            id: cover_6
+            position: 0%
+
 
   - platform: template
-    name: "${window_1_name} – Sperre aufheben"
-    icon: "mdi:lock-open-variant-outline"
+    name: "${window_alle_name} 25%"
     on_press:
-      - lambda: 'id(needs_calibration_1) = false; id(notify_sent_1) = false;'
-      - cover.template.publish: { id: jalousie1_ui, current_operation: IDLE }
+      then:
+        - cover.control:
+            id: cover_1
+            position: 25%
+        - cover.control:
+            id: cover_2
+            position: 25%
+        - cover.control:
+            id: cover_3
+            position: 25%
+        - cover.control:
+            id: cover_4
+            position: 25%
+        - cover.control:
+            id: cover_5
+            position: 25%
+        - cover.control:
+            id: cover_6
+            position: 25%
+
 
   - platform: template
-    name: "${window_2_name} – Sperre aufheben"
-    icon: "mdi:lock-open-variant-outline"
+    name: "${window_alle_name} 50%"
     on_press:
-      - lambda: 'id(needs_calibration_2) = false; id(notify_sent_2) = false;'
-      - cover.template.publish: { id: jalousie2_ui, current_operation: IDLE }
+      then:
+        - cover.control:
+            id: cover_1
+            position: 50%
+        - cover.control:
+            id: cover_2
+            position: 50%
+        - cover.control:
+            id: cover_3
+            position: 50%
+        - cover.control:
+            id: cover_4
+            position: 50%
+        - cover.control:
+            id: cover_5
+            position: 50%
+        - cover.control:
+            id: cover_6
+            position: 50%
+
 
   - platform: template
-    name: "${window_3_name} – Sperre aufheben"
-    icon: "mdi:lock-open-variant-outline"
+    name: "${window_alle_name} 75%"
     on_press:
-      - lambda: 'id(needs_calibration_3) = false; id(notify_sent_3) = false;'
-      - cover.template.publish: { id: jalousie3_ui, current_operation: IDLE }
+      then:
+        - cover.control:
+            id: cover_1
+            position: 75%
+        - cover.control:
+            id: cover_2
+            position: 75%
+        - cover.control:
+            id: cover_3
+            position: 75%
+        - cover.control:
+            id: cover_4
+            position: 75%
+        - cover.control:
+            id: cover_5
+            position: 75%
+        - cover.control:
+            id: cover_6
+            position: 75%
+
 
   - platform: template
-    name: "${window_4_name} – Sperre aufheben"
-    icon: "mdi:lock-open-variant-outline"
+    name: "${window_alle_name} 100%"
     on_press:
-      - lambda: 'id(needs_calibration_4) = false; id(notify_sent_4) = false;'
-      - cover.template.publish: { id: jalousie4_ui, current_operation: IDLE }
+      then:
+        - cover.control:
+            id: cover_1
+            position: 100%
+        - cover.control:
+            id: cover_2
+            position: 100%
+        - cover.control:
+            id: cover_3
+            position: 100%
+        - cover.control:
+            id: cover_4
+            position: 100%
+        - cover.control:
+            id: cover_5
+            position: 100%
+        - cover.control:
+            id: cover_6
+            position: 100%
 
-  - platform: template
-    name: "${window_5_name} – Sperre aufheben"
-    icon: "mdi:lock-open-variant-outline"
-    on_press:
-      - lambda: 'id(needs_calibration_5) = false; id(notify_sent_5) = false;'
-      - cover.template.publish: { id: jalousie5_ui, current_operation: IDLE }
 
+  # --- Fenster 1 ---
   - platform: template
-    name: "${window_6_name} – Sperre aufheben"
-    icon: "mdi:lock-open-variant-outline"
+    name: "${window_1_name} 25%"
     on_press:
-      - lambda: 'id(needs_calibration_6) = false; id(notify_sent_6) = false;'
-      - cover.template.publish: { id: jalousie6_ui, current_operation: IDLE }
+      then:
+        - cover.control:
+            id: cover_1
+            position: 25%
+  - platform: template
+    name: "${window_1_name} 50%"
+    on_press:
+      then:
+        - cover.control:
+            id: cover_1
+            position: 50%
+  - platform: template
+    name: "${window_1_name} 75%"
+    on_press:
+      then:
+        - cover.control:
+            id: cover_1
+            position: 75%
 
+  # --- Fenster 2 ---
   - platform: template
-    name: "Alle (1–6) VIRTUELL – UI auf UNTEN setzen"
-    icon: "mdi:tray-arrow-down"
+    name: "${window_2_name} 25%"
     on_press:
-      - script.execute: force_state_all_down_fake
+      then:
+        - cover.control:
+            id: cover_2
+            position: 25%
+  - platform: template
+    name: "${window_2_name} 50%"
+    on_press:
+      then:
+        - cover.control:
+            id: cover_2
+            position: 50%
+  - platform: template
+    name: "${window_2_name} 75%"
+    on_press:
+      then:
+        - cover.control:
+            id: cover_2
+            position: 75%
 
+  # --- Fenster 3 ---
   - platform: template
-    name: "Alle (1–6) VIRTUELL – UI auf OBEN setzen"
-    icon: "mdi:tray-arrow-up"
+    name: "${window_3_name} 25%"
     on_press:
-      - script.execute: force_state_all_up_fake
+      then:
+        - cover.control:
+            id: cover_3
+            position: 25%
+  - platform: template
+    name: "${window_3_name} 50%"
+    on_press:
+      then:
+        - cover.control:
+            id: cover_3
+            position: 50%
+  - platform: template
+    name: "${window_3_name} 75%"
+    on_press:
+      then:
+        - cover.control:
+            id: cover_3
+            position: 75%
 
+  # --- Fenster 4 ---
   - platform: template
-    name: "Alle Jalousien – Auf"
-    icon: "mdi:arrow-up-bold"
+    name: "${window_4_name} 25%"
     on_press:
-      - logger.log: "Gruppe: Alle Jalousien -> AUF"
-      - if: { condition: { lambda: 'return !id(needs_calibration_1);' }, then: [cover.open: jalousie1_hw] }
-      - if: { condition: { lambda: 'return !id(needs_calibration_2);' }, then: [cover.open: jalousie2_hw] }
-      - if: { condition: { lambda: 'return !id(needs_calibration_3);' }, then: [cover.open: jalousie3_hw] }
-      - if: { condition: { lambda: 'return !id(needs_calibration_4);' }, then: [cover.open: jalousie4_hw] }
-      - if: { condition: { lambda: 'return !id(needs_calibration_5);' }, then: [cover.open: jalousie5_hw] }
-      - if: { condition: { lambda: 'return !id(needs_calibration_6);' }, then: [cover.open: jalousie6_hw] }
+      then:
+        - cover.control:
+            id: cover_4
+            position: 25%
+  - platform: template
+    name: "${window_4_name} 50%"
+    on_press:
+      then:
+        - cover.control:
+            id: cover_4
+            position: 50%
+  - platform: template
+    name: "${window_4_name} 75%"
+    on_press:
+      then:
+        - cover.control:
+            id: cover_4
+            position: 75%
 
+  # --- Fenster 5 ---
   - platform: template
-    name: "Alle Jalousien – Zu"
-    icon: "mdi:arrow-down-bold"
+    name: "${window_5_name} 25%"
     on_press:
-      - logger.log: "Gruppe: Alle Jalousien -> ZU"
-      - if: { condition: { lambda: 'return !id(needs_calibration_1);' }, then: [cover.close: jalousie1_hw] }
-      - if: { condition: { lambda: 'return !id(needs_calibration_2);' }, then: [cover.close: jalousie2_hw] }
-      - if: { condition: { lambda: 'return !id(needs_calibration_3);' }, then: [cover.close: jalousie3_hw] }
-      - if: { condition: { lambda: 'return !id(needs_calibration_4);' }, then: [cover.close: jalousie4_hw] }
-      - if: { condition: { lambda: 'return !id(needs_calibration_5);' }, then: [cover.close: jalousie5_hw] }
-      - if: { condition: { lambda: 'return !id(needs_calibration_6);' }, then: [cover.close: jalousie6_hw] }
+      then:
+        - cover.control:
+            id: cover_5
+            position: 25%
+  - platform: template
+    name: "${window_5_name} 50%"
+    on_press:
+      then:
+        - cover.control:
+            id: cover_5
+            position: 50%
+  - platform: template
+    name: "${window_5_name} 75%"
+    on_press:
+      then:
+        - cover.control:
+            id: cover_5
+            position: 75%
 
+  # --- Fenster 6 ---
   - platform: template
-    name: "Alle Jalousien – 25%"
-    icon: "mdi:blinds"
+    name: "${window_6_name} 25%"
     on_press:
-      - logger.log: "Gruppe: Alle Jalousien -> 25 %"
-      - if:
-          condition: { lambda: 'return !id(needs_calibration_1);' }
-          then:
-            - cover.control: { id: jalousie1_hw, position: 0.25 }
-            - cover.template.publish: { id: jalousie1_ui, position: 0.25, current_operation: IDLE }
-      - if:
-          condition: { lambda: 'return !id(needs_calibration_2);' }
-          then:
-            - cover.control: { id: jalousie2_hw, position: 0.25 }
-            - cover.template.publish: { id: jalousie2_ui, position: 0.25, current_operation: IDLE }
-      - if:
-          condition: { lambda: 'return !id(needs_calibration_3);' }
-          then:
-            - cover.control: { id: jalousie3_hw, position: 0.25 }
-            - cover.template.publish: { id: jalousie3_ui, position: 0.25, current_operation: IDLE }
-      - if:
-          condition: { lambda: 'return !id(needs_calibration_4);' }
-          then:
-            - cover.control: { id: jalousie4_hw, position: 0.25 }
-            - cover.template.publish: { id: jalousie4_ui, position: 0.25, current_operation: IDLE }
-      - if:
-          condition: { lambda: 'return !id(needs_calibration_5);' }
-          then:
-            - cover.control: { id: jalousie5_hw, position: 0.25 }
-            - cover.template.publish: { id: jalousie5_ui, position: 0.25, current_operation: IDLE }
-      - if:
-          condition: { lambda: 'return !id(needs_calibration_6);' }
-          then:
-            - cover.control: { id: jalousie6_hw, position: 0.25 }
-            - cover.template.publish: { id: jalousie6_ui, position: 0.25, current_operation: IDLE }
+      then:
+        - cover.control:
+            id: cover_6
+            position: 25%
+  - platform: template
+    name: "${window_6_name} 50%"
+    on_press:
+      then:
+        - cover.control:
+            id: cover_6
+            position: 50%
+  - platform: template
+    name: "${window_6_name} 75%"
+    on_press:
+      then:
+        - cover.control:
+            id: cover_6
+            position: 75%
 
-  - platform: template
-    name: "Alle Jalousien – 50%"
-    icon: "mdi:blinds-open"
-    on_press:
-      - logger.log: "Gruppe: Alle Jalousien -> 50 %"
-      - if:
-          condition: { lambda: 'return !id(needs_calibration_1);' }
-          then:
-            - cover.control: { id: jalousie1_hw, position: 0.50 }
-            - cover.template.publish: { id: jalousie1_ui, position: 0.50, current_operation: IDLE }
-      - if:
-          condition: { lambda: 'return !id(needs_calibration_2);' }
-          then:
-            - cover.control: { id: jalousie2_hw, position: 0.50 }
-            - cover.template.publish: { id: jalousie2_ui, position: 0.50, current_operation: IDLE }
-      - if:
-          condition: { lambda: 'return !id(needs_calibration_3);' }
-          then:
-            - cover.control: { id: jalousie3_hw, position: 0.50 }
-            - cover.template.publish: { id: jalousie3_ui, position: 0.50, current_operation: IDLE }
-      - if:
-          condition: { lambda: 'return !id(needs_calibration_4);' }
-          then:
-            - cover.control: { id: jalousie4_hw, position: 0.50 }
-            - cover.template.publish: { id: jalousie4_ui, position: 0.50, current_operation: IDLE }
-      - if:
-          condition: { lambda: 'return !id(needs_calibration_5);' }
-          then:
-            - cover.control: { id: jalousie5_hw, position: 0.50 }
-            - cover.template.publish: { id: jalousie5_ui, position: 0.50, current_operation: IDLE }
-      - if:
-          condition: { lambda: 'return !id(needs_calibration_6);' }
-          then:
-            - cover.control: { id: jalousie6_hw, position: 0.50 }
-            - cover.template.publish: { id: jalousie6_ui, position: 0.50, current_operation: IDLE }
 
-  - platform: template
-    name: "Alle Jalousien – 75%"
-    icon: "mdi:blinds"
-    on_press:
-      - logger.log: "Gruppe: Alle Jalousien -> 75 %"
-      - if:
-          condition: { lambda: 'return !id(needs_calibration_1);' }
-          then:
-            - cover.control: { id: jalousie1_hw, position: 0.75 }
-            - cover.template.publish: { id: jalousie1_ui, position: 0.75, current_operation: IDLE }
-      - if:
-          condition: { lambda: 'return !id(needs_calibration_2);' }
-          then:
-            - cover.control: { id: jalousie2_hw, position: 0.75 }
-            - cover.template.publish: { id: jalousie2_ui, position: 0.75, current_operation: IDLE }
-      - if:
-          condition: { lambda: 'return !id(needs_calibration_3);' }
-          then:
-            - cover.control: { id: jalousie3_hw, position: 0.75 }
-            - cover.template.publish: { id: jalousie3_ui, position: 0.75, current_operation: IDLE }
-      - if:
-          condition: { lambda: 'return !id(needs_calibration_4);' }
-          then:
-            - cover.control: { id: jalousie4_hw, position: 0.75 }
-            - cover.template.publish: { id: jalousie4_ui, position: 0.75, current_operation: IDLE }
-      - if:
-          condition: { lambda: 'return !id(needs_calibration_5);' }
-          then:
-            - cover.control: { id: jalousie5_hw, position: 0.75 }
-            - cover.template.publish: { id: jalousie5_ui, position: 0.75, current_operation: IDLE }
-      - if:
-          condition: { lambda: 'return !id(needs_calibration_6);' }
-          then:
-            - cover.control: { id: jalousie6_hw, position: 0.75 }
-            - cover.template.publish: { id: jalousie6_ui, position: 0.75, current_operation: IDLE }
+# bürgerlich (Sunset) -> 0.50
+# nautisch (Sunset)   -> 0.10
+# astronomisch        -> close
+# ... jeweils analog mit set_position() oder set_command_close()
+sun:
+  latitude: ${latitude}
+  longitude: ${longitude}
+  id: sun_sun
 
-  - platform: template
-    name: "${window_1_name} – 25%"
-    icon: "mdi:blinds"
-    on_press:
-      - if:
-          condition: { lambda: 'return id(needs_calibration_1);' }
-          then: [logger.log: "${window_1_name}: gesperrt – zuerst kalibrieren."]
-          else:
-            - cover.control: { id: jalousie1_hw, position: 0.25 }
-            - cover.template.publish: { id: jalousie1_ui, position: 0.25, current_operation: IDLE }
+  on_sunrise:
+    - elevation: -18.0
+      then:
+        - logger.log:
+            format: "Sunrise: astronomisch (–18°) erreicht"
+        - lambda: |-
+            if (!id(jalousie_automatik).state) return;
+            if (id(twilight_mode).state != "astronomisch") return;
+            esphome::cover::Cover* covers[] = { id(cover_1), id(cover_2), id(cover_3), id(cover_4), id(cover_5), id(cover_6) };
+            for (auto *c : covers) { auto call = c->make_call(); call.set_position(0.10f); call.perform(); }
 
-  - platform: template
-    name: "${window_1_name} – 50%"
-    icon: "mdi:blinds"
-    on_press:
-      - if:
-          condition: { lambda: 'return id(needs_calibration_1);' }
-          then: [logger.log: "${window_1_name}: gesperrt – zuerst kalibrieren."]
-          else:
-            - cover.control: { id: jalousie1_hw, position: 0.50 }
-            - cover.template.publish: { id: jalousie1_ui, position: 0.50, current_operation: IDLE }
+    - elevation: -12.0
+      then:
+        - logger.log:
+            format: "Sunrise: nautisch (–12°) erreicht"
+        - lambda: |-
+            if (!id(jalousie_automatik).state) return;
+            if (id(twilight_mode).state != "nautisch") return;
+            esphome::cover::Cover* covers[] = { id(cover_1), id(cover_2), id(cover_3), id(cover_4), id(cover_5), id(cover_6) };
+            for (auto *c : covers) { auto call = c->make_call(); call.set_position(0.50f); call.perform(); }
 
-  - platform: template
-    name: "${window_1_name} – 75%"
-    icon: "mdi:blinds"
-    on_press:
-      - if:
-          condition: { lambda: 'return id(needs_calibration_1);' }
-          then: [logger.log: "${window_1_name}: gesperrt – zuerst kalibrieren."]
-          else:
-            - cover.control: { id: jalousie1_hw, position: 0.75 }
-            - cover.template.publish: { id: jalousie1_ui, position: 0.75, current_operation: IDLE }
+    - elevation: -6.0
+      then:
+        - logger.log:
+            format: "Sunrise: bürgerlich (–6°) erreicht"
+        - lambda: |-
+            if (!id(jalousie_automatik).state) return;
+            if (id(twilight_mode).state != "bürgerlich") return;
+            esphome::cover::Cover* covers[] = { id(cover_1), id(cover_2), id(cover_3), id(cover_4), id(cover_5), id(cover_6) };
+            for (auto *c : covers) { auto call = c->make_call(); call.set_command_open(); call.perform(); }
 
-  - platform: template
-    name: "${window_2_name} – 25%"
-    icon: "mdi:blinds"
-    on_press:
-      - if:
-          condition: { lambda: 'return id(needs_calibration_2);' }
-          then: [logger.log: "${window_2_name}: gesperrt – zuerst kalibrieren."]
-          else:
-            - cover.control: { id: jalousie2_hw, position: 0.25 }
-            - cover.template.publish: { id: jalousie2_ui, position: 0.25, current_operation: IDLE }
+  on_sunset:
+    - elevation: -6.0
+      then:
+        - logger.log:
+            format: "Sunset: bürgerlich (–6°) erreicht"
+        - lambda: |-
+            if (!id(jalousie_automatik).state) return;
+            if (id(twilight_mode).state != "bürgerlich") return;
+            esphome::cover::Cover* covers[] = { id(cover_1), id(cover_2), id(cover_3), id(cover_4), id(cover_5), id(cover_6) };
+            for (auto *c : covers) { auto call = c->make_call(); call.set_position(0.50f); call.perform(); }
 
-  - platform: template
-    name: "${window_2_name} – 50%"
-    icon: "mdi:blinds"
-    on_press:
-      - if:
-          condition: { lambda: 'return id(needs_calibration_2);' }
-          then: [logger.log: "${window_2_name}: gesperrt – zuerst kalibrieren."]
-          else:
-            - cover.control: { id: jalousie2_hw, position: 0.50 }
-            - cover.template.publish: { id: jalousie2_ui, position: 0.50, current_operation: IDLE }
+    - elevation: -12.0
+      then:
+        - logger.log:
+            format: "Sunset: nautisch (–12°) erreicht"
+        - lambda: |-
+            if (!id(jalousie_automatik).state) return;
+            if (id(twilight_mode).state != "nautisch") return;
+            esphome::cover::Cover* covers[] = { id(cover_1), id(cover_2), id(cover_3), id(cover_4), id(cover_5), id(cover_6) };
+            for (auto *c : covers) { auto call = c->make_call(); call.set_position(0.10f); call.perform(); }
 
-  - platform: template
-    name: "${window_2_name} – 75%"
-    icon: "mdi:blinds"
-    on_press:
-      - if:
-          condition: { lambda: 'return id(needs_calibration_2);' }
-          then: [logger.log: "${window_2_name}: gesperrt – zuerst kalibrieren."]
-          else:
-            - cover.control: { id: jalousie2_hw, position: 0.75 }
-            - cover.template.publish: { id: jalousie2_ui, position: 0.75, current_operation: IDLE }
+    - elevation: -18.0
+      then:
+        - logger.log:
+            format: "Sunset: astronomisch (–18°) erreicht"
+        - lambda: |-
+            if (!id(jalousie_automatik).state) return;
+            if (id(twilight_mode).state != "astronomisch") return;
+            esphome::cover::Cover* covers[] = { id(cover_1), id(cover_2), id(cover_3), id(cover_4), id(cover_5), id(cover_6) };
+            for (auto *c : covers) { auto call = c->make_call(); call.set_command_close(); call.perform(); }
 
-  - platform: template
-    name: "${window_3_name} – 25%"
-    icon: "mdi:blinds"
-    on_press:
-      - if:
-          condition: { lambda: 'return id(needs_calibration_3);' }
-          then: [logger.log: "${window_3_name}: gesperrt – zuerst kalibrieren."]
-          else:
-            - cover.control: { id: jalousie3_hw, position: 0.25 }
-            - cover.template.publish: { id: jalousie3_ui, position: 0.25, current_operation: IDLE }
 
-  - platform: template
-    name: "${window_3_name} – 50%"
-    icon: "mdi:blinds"
-    on_press:
-      - if:
-          condition: { lambda: 'return id(needs_calibration_3);' }
-          then: [logger.log: "${window_3_name}: gesperrt – zuerst kalibrieren."]
-          else:
-            - cover.control: { id: jalousie3_hw, position: 0.50 }
-            - cover.template.publish: { id: jalousie3_ui, position: 0.50, current_operation: IDLE }
 
-  - platform: template
-    name: "${window_3_name} – 75%"
-    icon: "mdi:blinds"
-    on_press:
-      - if:
-          condition: { lambda: 'return id(needs_calibration_3);' }
-          then: [logger.log: "${window_3_name}: gesperrt – zuerst kalibrieren."]
-          else:
-            - cover.control: { id: jalousie3_hw, position: 0.75 }
-            - cover.template.publish: { id: jalousie3_ui, position: 0.75, current_operation: IDLE }
+  # ===================== COVER =====================
+cover:
+  - platform: time_based
+    name: "Gaeste Schlafzimmer"
+    id: cover_1
 
-  - platform: template
-    name: "${window_4_name} – 25%"
-    icon: "mdi:blinds"
-    on_press:
-      - if:
-          condition: { lambda: 'return id(needs_calibration_4);' }
-          then: [logger.log: "${window_4_name}: gesperrt – zuerst kalibrieren."]
-          else:
-            - cover.control: { id: jalousie4_hw, position: 0.25 }
-            - cover.template.publish: { id: jalousie4_ui, position: 0.25, current_operation: IDLE }
+    open_action:
+      - switch.turn_on: relais_auf_1
 
-  - platform: template
-    name: "${window_4_name} – 50%"
-    icon: "mdi:blinds"
-    on_press:
-      - if:
-          condition: { lambda: 'return id(needs_calibration_4);' }
-          then: [logger.log: "${window_4_name}: gesperrt – zuerst kalibrieren."]
-          else:
-            - cover.control: { id: jalousie4_hw, position: 0.50 }
-            - cover.template.publish: { id: jalousie4_ui, position: 0.50, current_operation: IDLE }
+    open_duration: 29s
 
-  - platform: template
-    name: "${window_4_name} – 75%"
-    icon: "mdi:blinds"
-    on_press:
-      - if:
-          condition: { lambda: 'return id(needs_calibration_4);' }
-          then: [logger.log: "${window_4_name}: gesperrt – zuerst kalibrieren."]
-          else:
-            - cover.control: { id: jalousie4_hw, position: 0.75 }
-            - cover.template.publish: { id: jalousie4_ui, position: 0.75, current_operation: IDLE }
+    close_action:
+      - switch.turn_on: relais_zu_1
+
+    close_duration: 29s
+
+    stop_action:
+      - switch.turn_off: relais_auf_1
+      - switch.turn_off: relais_zu_1
+
+  - platform: time_based
+    name: "Kuechen Fenster"
+    id: cover_2
+
+    open_action:
+      - switch.turn_on: relais_auf_2
+
+    open_duration: 23s
+
+    close_action:
+      - switch.turn_on: relais_zu_2
+
+    close_duration: 24s
+
+    stop_action:
+      - switch.turn_off: relais_auf_2
+      - switch.turn_off: relais_zu_2
+
+
+  - platform: time_based
+    name: "Empore"
+    id: cover_3
+    open_action:
+
+      - switch.turn_on: relais_auf_3
+
+    open_duration: 30s
+
+    close_action:
+
+      - switch.turn_on: relais_zu_3
+
+    close_duration: 30s
+
+    stop_action:
+      - switch.turn_off: relais_auf_3
+      - switch.turn_off: relais_zu_3
+
+
+  - platform: time_based
+    name: "Wohnzimmer Fenster"
+    id: cover_4
+    open_action:
+      - switch.turn_on: relais_auf_4
+
+    open_duration: 33s
+
+    close_action:
+      - switch.turn_on: relais_zu_4
+
+    close_duration: 28s
+
+    stop_action:
+      - switch.turn_off: relais_auf_4
+      - switch.turn_off: relais_zu_4
+
+  - platform: time_based
+    name: "Schlafzimmer L"
+    id: cover_5
+    open_action:
+      - switch.turn_on: relais_auf_5
+
+    open_duration: 30s
+
+    close_action:
+      - switch.turn_on: relais_zu_5
+
+    close_duration: 30s
+
+    stop_action:
+      - switch.turn_off: relais_auf_5
+      - switch.turn_off: relais_zu_5
+
+
+
+  - platform: time_based
+    name: "Schlafzimmer R"
+    id: cover_6
+    open_action:
+      - switch.turn_on: relais_auf_6
+
+    open_duration: 34s
+
+    close_action:
+      - switch.turn_on: relais_zu_6
+
+    close_duration: 34s
+
+    stop_action:
+      - switch.turn_off: relais_auf_6
+      - switch.turn_off: relais_zu_6
 
