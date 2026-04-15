@@ -1150,13 +1150,13 @@ cover:
 
       - switch.turn_on: relais_auf_3
 
-    open_duration: 30s
+    open_duration: 120s
 
     close_action:
 
       - switch.turn_on: relais_zu_3
 
-    close_duration: 30s
+    close_duration: 120s
 
     stop_action:
       - switch.turn_off: relais_auf_3
