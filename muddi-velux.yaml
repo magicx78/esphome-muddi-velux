@@ -189,6 +189,20 @@ api:
   encryption:
     key: "50W+iCzJ2PitfU/6aY1L+7c35rVKHL/WG62NFSTg2lo="
   reboot_timeout: 0s
+  actions:
+    - action: move_cover_seconds
+      variables:
+        cover_nr: int
+        duration: int
+        direction: bool
+        sync_to_end: bool
+      then:
+        - script.execute:
+            id: move_cover_seconds
+            cover_nr: !lambda "return cover_nr;"
+            duration: !lambda "return duration;"
+            direction: !lambda "return direction;"
+            sync_to_end: !lambda "return sync_to_end;"
 
 ota:
   - platform: esphome
@@ -1030,6 +1044,90 @@ button:
             id: cover_6
             position: 75%
 
+script:
+  - id: move_cover_seconds
+    mode: restart
+    parameters:
+      cover_nr: int
+      duration: int
+      direction: bool
+      sync_to_end: bool
+    then:
+      - lambda: |-
+          esphome::switch_::Switch *open_relays[] = {
+            id(relais_auf_1), id(relais_auf_2), id(relais_auf_3),
+            id(relais_auf_4), id(relais_auf_5), id(relais_auf_6)
+          };
+          esphome::switch_::Switch *close_relays[] = {
+            id(relais_zu_1), id(relais_zu_2), id(relais_zu_3),
+            id(relais_zu_4), id(relais_zu_5), id(relais_zu_6)
+          };
+          esphome::cover::Cover *covers[] = {
+            id(cover_1), id(cover_2), id(cover_3),
+            id(cover_4), id(cover_5), id(cover_6)
+          };
+
+          const int count = sizeof(covers) / sizeof(covers[0]);
+          if (cover_nr < 1 || cover_nr > count) {
+            ESP_LOGW("cover_script", "Ungueltige cover_nr: %d", cover_nr);
+            return;
+          }
+
+          if (duration < 1) duration = 1;
+          if (duration > 120) duration = 120;
+
+          const int idx = cover_nr - 1;
+
+          // Sicherstellen, dass niemals beide Richtungen gleichzeitig an sind
+          open_relays[idx]->turn_off();
+          close_relays[idx]->turn_off();
+
+          if (direction) {
+            open_relays[idx]->turn_on();
+            ESP_LOGI("cover_script", "Cover %d fuer %ds NACH OBEN", cover_nr, duration);
+          } else {
+            close_relays[idx]->turn_on();
+            ESP_LOGI("cover_script", "Cover %d fuer %ds NACH UNTEN", cover_nr, duration);
+          }
+
+      - delay: !lambda "return duration * 1000;"
+
+      - lambda: |-
+          esphome::switch_::Switch *open_relays[] = {
+            id(relais_auf_1), id(relais_auf_2), id(relais_auf_3),
+            id(relais_auf_4), id(relais_auf_5), id(relais_auf_6)
+          };
+          esphome::switch_::Switch *close_relays[] = {
+            id(relais_zu_1), id(relais_zu_2), id(relais_zu_3),
+            id(relais_zu_4), id(relais_zu_5), id(relais_zu_6)
+          };
+          esphome::cover::Cover *covers[] = {
+            id(cover_1), id(cover_2), id(cover_3),
+            id(cover_4), id(cover_5), id(cover_6)
+          };
+
+          const int count = sizeof(covers) / sizeof(covers[0]);
+          if (cover_nr < 1 || cover_nr > count) {
+            ESP_LOGW("cover_script", "Ungueltige cover_nr: %d", cover_nr);
+            return;
+          }
+          const int idx = cover_nr - 1;
+
+          open_relays[idx]->turn_off();
+          close_relays[idx]->turn_off();
+
+          if (sync_to_end) {
+            if (direction) {
+              covers[idx]->position = esphome::cover::COVER_OPEN;
+              ESP_LOGI("cover_script", "Cover %d interne Position auf 100%% synchronisiert", cover_nr);
+            } else {
+              covers[idx]->position = esphome::cover::COVER_CLOSED;
+              ESP_LOGI("cover_script", "Cover %d interne Position auf 0%% synchronisiert", cover_nr);
+            }
+            covers[idx]->current_operation = esphome::cover::COVER_OPERATION_IDLE;
+            covers[idx]->publish_state();
+          }
+
 
 # bürgerlich (Sunset) -> 0.50
 # nautisch (Sunset)   -> 0.10
@@ -1215,4 +1313,3 @@ cover:
     stop_action:
       - switch.turn_off: relais_auf_6
       - switch.turn_off: relais_zu_6
-
