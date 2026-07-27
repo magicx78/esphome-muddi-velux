@@ -168,6 +168,7 @@ packages:
 
 esp32:
   board: esp32dev
+  toolchain: platformio
   framework:
     type: esp-idf
     sdkconfig_options:
