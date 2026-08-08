@@ -1,0 +1,82 @@
+name: ESPHome config validation
+
+on:
+  pull_request:
+    paths:
+      - "bresser-weather/**"
+      - "muddi-velux.yaml"
+      - ".github/workflows/esphome-validate.yml"
+  push:
+    branches: [main]
+
+jobs:
+  validate-bresser-weather:
+    name: Validate bresser-weather/example.yaml
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install ESPHome
+        run: pip install --quiet esphome
+      - name: Write CI shim yaml with local component source
+        working-directory: bresser-weather
+        run: |
+          cat > example-ci.yaml <<'EOF'
+          esphome:
+            name: bresser-test
+          esp32:
+            board: esp32dev
+            framework:
+              type: arduino
+          logger:
+            level: DEBUG
+          external_components:
+            - source: components
+              components: [bresser_weather]
+          bresser_weather:
+            id: bresser_hub
+            sck_pin: 5
+            miso_pin: 19
+            mosi_pin: 27
+            cs_pin: 18
+            rst_pin: 23
+            dio0_pin: 26
+            dio1_pin: 33
+          sensor:
+            - platform: bresser_weather
+              sensor_id: 0x12345678
+              temperature: { name: "Temp" }
+              humidity: { name: "Hum" }
+              wind_speed: { name: "Wind" }
+              wind_gust: { name: "Gust" }
+              wind_direction: { name: "Dir" }
+              rain: { name: "Rain" }
+              uv: { name: "UV" }
+              light: { name: "Light" }
+              rssi: { name: "RSSI" }
+              battery_ok: { name: "Batt" }
+          EOF
+      - name: Validate config
+        working-directory: bresser-weather
+        run: esphome config example-ci.yaml
+
+  validate-muddi-velux:
+    name: Validate muddi-velux.yaml
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install ESPHome
+        run: pip install --quiet esphome
+      - name: Stub secrets.yaml
+        run: |
+          cat > secrets.yaml <<'EOF'
+          wifi_ssid: "ci-stub"
+          wifi_password: "ci-stub-password"
+          EOF
+      - name: Validate config
+        run: esphome config muddi-velux.yaml
